@@ -1,0 +1,7 @@
+{
+  "name": "RunPro AI Coach",
+  "description": "An advanced AI-powered marathon training platform that provides personalized running plans, strength training, and performance analytics.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
