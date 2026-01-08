@@ -41,12 +41,26 @@ export interface TrainingPlan {
   workouts: Workout[];
 }
 
+export interface PlanRevision {
+  id: string;
+  timestamp: string;
+  changeNote: string;
+  targetDistance: number;
+  targetPace?: string;
+}
+
+export interface IntermediateGoal {
+  distance: 5 | 10 | 21.1;
+  targetPace: string;
+}
+
 export interface SavedTrainingPlan {
   id: string;
   name: string;
   targetDistance: number;
   dateCreated: string;
   plan: TrainingPlan;
+  history?: PlanRevision[];
 }
 
 export interface UserProfile {
@@ -56,6 +70,9 @@ export interface UserProfile {
   weight: number;
   fitnessLevel: 'Beginner' | 'Intermediate' | 'Advanced';
   targetDistance: 5 | 10 | 21.1 | 42.2;
+  targetPace?: string; // Format: "mm:ss"
+  intermediateGoal?: IntermediateGoal;
+  avatarId?: string;
 }
 
 export interface LoggedWorkout {
@@ -64,6 +81,7 @@ export interface LoggedWorkout {
   mileage: number;
   pace: number; // in minutes per km
   type: WorkoutType;
+  intensity: 'Low' | 'Medium' | 'High';
   exercises?: StrengthExercise[];
 }
 

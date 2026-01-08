@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Dashboard } from './components/Dashboard';
 import { TrainingPlanView } from './components/TrainingPlanView';
 import { AICoachChat } from './components/AICoachChat';
@@ -12,12 +12,23 @@ import {
   Bell, 
   Search,
   ChevronRight,
-  Palette
+  Palette,
+  User,
+  X,
+  Check
 } from 'lucide-react';
+
+const AVATAR_OPTIONS = ['64', '65', '103', '177', '209', '338', '342', '442', '550', '633', '823', '900'];
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'plan' | 'coach'>('dashboard');
   const [theme, setTheme] = useState<AppTheme>('blue');
+  const [avatarId, setAvatarId] = useState<string>(() => localStorage.getItem('runpro_avatar_id') || '64');
+  const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
+
+  useEffect(() => {
+    localStorage.setItem('runpro_avatar_id', avatarId);
+  }, [avatarId]);
 
   // Mapping theme to tailwind classes
   const themeClasses = useMemo(() => {
@@ -46,6 +57,60 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen flex bg-[#f8fafc]">
+      {/* Avatar Selection Modal */}
+      {isAvatarModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-white w-full max-w-lg rounded-[40px] shadow-2xl overflow-hidden border border-gray-100 animate-slideIn">
+            <div className="p-8">
+              <div className="flex justify-between items-center mb-8">
+                <div>
+                  <h3 className="text-2xl font-black text-gray-900 tracking-tight">เลือกตัวตนของคุณ</h3>
+                  <p className="text-sm text-gray-400 font-medium">เปลี่ยนรูปโปรไฟล์ให้นักวิ่งของคุณ</p>
+                </div>
+                <button onClick={() => setIsAvatarModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition p-2 bg-gray-50 rounded-full">
+                  <X size={24} />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                {AVATAR_OPTIONS.map((id) => (
+                  <button
+                    key={id}
+                    onClick={() => {
+                      setAvatarId(id);
+                      setIsAvatarModalOpen(false);
+                    }}
+                    className={`relative rounded-3xl overflow-hidden aspect-square border-4 transition-all hover:scale-105 active:scale-95 ${
+                      avatarId === id ? `border-current ${themeClasses.text} ring-4 ring-offset-2 ring-transparent` : 'border-transparent hover:border-gray-100'
+                    }`}
+                  >
+                    <img 
+                      src={`https://picsum.photos/id/${id}/200/200`} 
+                      alt={`Avatar ${id}`} 
+                      className="w-full h-full object-cover"
+                    />
+                    {avatarId === id && (
+                      <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+                        <div className="bg-white text-green-600 p-1.5 rounded-full shadow-lg">
+                          <Check size={16} strokeWidth={4} />
+                        </div>
+                      </div>
+                    )}
+                  </button>
+                ))}
+              </div>
+
+              <button 
+                onClick={() => setIsAvatarModalOpen(false)}
+                className={`w-full mt-8 py-4 rounded-2xl font-bold transition-all ${themeClasses.primary} text-white ${themeClasses.hover} shadow-xl ${themeClasses.shadow}`}
+              >
+                บันทึกการเปลี่ยนแปลง
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Sidebar */}
       <aside className="w-72 bg-white border-r border-gray-100 p-8 flex flex-col sticky top-0 h-screen hidden lg:flex">
         <div className="flex items-center space-x-3 mb-12">
@@ -74,16 +139,25 @@ const App: React.FC = () => {
         </nav>
 
         <div className="mt-auto pt-8 border-t border-gray-100">
-          <div className={`${themeClasses.light} p-4 rounded-2xl flex items-center justify-between transition-colors`}>
-            <div className="flex items-center space-x-3">
-              <img src="https://picsum.photos/id/64/40/40" alt="Profile" className="w-10 h-10 rounded-full border-2 border-white" />
+          <button 
+            onClick={() => setIsAvatarModalOpen(true)}
+            className={`${themeClasses.light} p-4 rounded-2xl flex items-center justify-between transition-all w-full group hover:shadow-md border border-transparent hover:border-gray-100`}
+          >
+            <div className="flex items-center space-x-3 text-left">
+              <img 
+                src={`https://picsum.photos/id/${avatarId}/100/100`} 
+                alt="Profile" 
+                className="w-10 h-10 rounded-full border-2 border-white shadow-sm object-cover" 
+              />
               <div>
-                <p className="text-sm font-bold text-gray-900">Alex Runner</p>
-                <p className={`text-xs ${themeClasses.text} font-semibold transition-colors`}>Pro Plan</p>
+                <p className="text-sm font-black text-gray-900">Alex Runner</p>
+                <p className={`text-[10px] font-black uppercase tracking-widest ${themeClasses.text} transition-colors`}>Pro Plan</p>
               </div>
             </div>
-            <ChevronRight size={16} className={themeClasses.text} />
-          </div>
+            <div className={`p-1 rounded-lg bg-white/50 group-hover:bg-white transition-colors`}>
+              <ChevronRight size={16} className={themeClasses.text} />
+            </div>
+          </button>
         </div>
       </aside>
 
@@ -117,6 +191,16 @@ const App: React.FC = () => {
               <Bell size={20} />
               <span className="absolute top-3 right-3 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
             </button>
+            <div 
+              onClick={() => setIsAvatarModalOpen(true)}
+              className="md:hidden cursor-pointer"
+            >
+              <img 
+                src={`https://picsum.photos/id/${avatarId}/100/100`} 
+                alt="Profile" 
+                className="w-10 h-10 rounded-full border-2 border-white shadow-sm object-cover" 
+              />
+            </div>
             <button className="bg-white border border-gray-100 rounded-2xl px-5 py-3 font-bold text-gray-800 shadow-sm hidden sm:block">
               เป้าหมายวันนี้: 85%
             </button>
